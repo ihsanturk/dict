@@ -41,7 +41,8 @@ def print_with_limit(sentence, limit, chars=''):
         c += 1
 
 def define_body(data):
-    word = data.find(class_='h3 di-title cdo-section-title-hw').text
+    #word = data.find(class_='h3 di-title cdo-section-title-hw').text
+    word = data.find(class_='headword').text
     try:
         type_of_words = data.find(class_='posgram ico-bg').text
     except AttributeError:
@@ -65,7 +66,7 @@ def print_body(word, type_of_words, descriptions, examples, space):
             except AttributeError:
                 pass
             if not description in temp:
-                print(space, i+1, '. ', description.strip().capitalize().replace(':','.'), sep='')
+                print(space, i+1, '. ', description.strip().capitalize().replace(':','.').replace('\n',''), sep='')
                 temp.append(description)
     else:
         for i, s in enumerate(descriptions):
@@ -74,7 +75,7 @@ def print_body(word, type_of_words, descriptions, examples, space):
             except AttributeError:
                 pass
             if not description in temp:
-                print(space, i+1, '. ', description.strip().capitalize().replace(':','.'), sep='')
+                print(space, i+1, '. ', description.strip().capitalize().replace(':','.').replace('\n',''), sep='')
                 temp.append(description)
 
     #Print Examples
