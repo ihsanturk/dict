@@ -86,6 +86,7 @@ def print_body(word, type_of_words, descriptions, examples, space):
     else:
         for i, s in enumerate(examples):
             print(space, i+1, '. ', (s.text).strip().capitalize(), sep='')
+    print('\n', sep='', end='')
 
 
 
