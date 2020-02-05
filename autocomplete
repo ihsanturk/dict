@@ -1,0 +1,15 @@
+#!/bin/sh
+#
+# Created at: 2020 Feb 5 11:00
+#
+# Output is autocompletion json
+
+lang=english
+[ $# -gt 0 ] && phrase=$1 || >&2 echo "usage $0: <phrase>" || exit 2
+url="https://dictionary.cambridge.org/autocomplete/amp?dataset=$lang&q=$phrase"
+
+curl -s $url -XGET \
+	-H 'Accept: application/json' \
+	-H 'Accept-Encoding: br, gzip, deflate' \
+	-H 'Accept-Language: en-gb' |
+	jq -r '.[].word'

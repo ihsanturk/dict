@@ -1,0 +1,69 @@
+#!/bin/sh
+#
+# Created at: 2020 Feb 5 11:00
+#
+# Output is custom formatted info.
+
+# Funcs
+flatten() { 
+	[ "$1" = "" ] &&
+		sed '/^\s*$/d' | tr -d '\n' | fold -sw 40 ||
+		sed '/^\s*$/d' | sed "N;s/\n/$1/" | tr '\n' " " | fold -sw 40;
+}
+
+# Vars
+[ "$1" = "" ] && exit 2; # TODO Make phrase optional.
+url="https://dictionary.cambridge.org/dictionary/english/$1"
+dir=${HOME}/.cache/cambridge
+file=$dir/${1}.html
+
+# Preparing the environment
+mkdir -p $dir
+
+# Selectors
+phrase='.di-title text{}' # DONE
+type_='.posgram text{}' # DONE
+pronunciation='.ipa.dipa.lpr-2.lpl-1 text{}' #DONE #TODO utf-8 problem
+definition='body > div:nth-child(1) > div.pos-body > div.pr.dsense.dsense-noh > div.sense-body.dsense_b > div:nth-child(1) > div.ddef_h > div text{}' # TODO Get one uniq definition.
+level='.epp-xref.dxref text{}' #DONE
+
+# Request
+if ! [ -f $file ]; then
+	curl -s $url -H 'Accept-Encoding: br, deflate' |
+		pup '.entry-body__el' > $file || exit 2;
+fi
+
+# Result
+if [ "$(cat $file)" = "" ]; then  
+	>&2 echo "$0: no such phrase in cambridge dictionary";
+	exit 2;
+else
+	## Level
+	tput dim;
+	cat $file | pup $level | grep -o '[A-z0-9]\+' | sort | uniq | flatten ' ';
+	tput sgr0;
+
+	## Phrase
+	tput bold; tput setaf 2;
+	cat $file | pup $phrase | grep -o '[A-z]\+' | sort | uniq | flatten ', ';
+	tput sgr0;
+	
+	# TODO
+	## Pronunciation
+	# printf ' | ';
+	# tput setaf 3;
+	# cat $file | pup $pronunciation | sort | uniq | flatten;
+	# tput sgr0;
+	
+	## Type
+	printf ' ';
+	tput dim;
+	cat $file | pup $type_ | grep -o '[A-z]\+' | sed '/^.$/d' | sort | uniq |
+		flatten ', ';
+	tput sgr0; echo;
+	
+	## Definition
+	echo
+	cat $file | pup $definition | grep -o "[A-z'\"]\+" | tr '\n' ' ' | flatten;
+	echo;
+fi

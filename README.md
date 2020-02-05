@@ -1,16 +1,10 @@
-# Terminal Based Dictionary
-## You Have to Install 
-If you don't have:
-```console
-your@machine:~$ sudo apt-get install python3-pip
-your@machine:~$ pip3 install requests beautifulsoup4
-```
+# Cambridge Dictionary CLI (Unofficial)
+
 ## Example
-```console
-your@machine:~$ python3 cambridge_dict.py worked
+```sh
+./cambridge worked
 ```
-## Syntax
-```console
-your@machine:~$ python3 cambridge_dict.py <word> <(optional)language>
+## Usage
+```sh
+python3 <phrase>
 ```
-[language] is english in default
