@@ -3,6 +3,7 @@
 # Created at: 2020 Feb 5 11:00
 #
 # Output is autocompletion json
+# TODO Read also stdin
 
 lang=english
 [ $# -gt 0 ] && phrase=$1 || >&2 echo "usage $0: <phrase>" || exit 2

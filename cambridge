@@ -12,19 +12,19 @@ flatten() {
 }
 
 # Vars
-[ "$1" = "" ] && exit 2; # TODO Make phrase optional.
-url="https://dictionary.cambridge.org/dictionary/english/$1"
+[ "$1" = "" ] && exit 2;
+url="https://dictionary.cambridge.org/dictionary/english/$(echo $1 | tr ' ' '-')"
 dir=${HOME}/.cache/cambridge
-file=$dir/${1}.html
+file=$dir/$(echo $1 | tr ' ' '-').html
 
 # Preparing the environment
 mkdir -p $dir
 
 # Selectors
-phrase='.di-title text{}' # DONE
-type_='.posgram text{}' # DONE
-pronunciation='.ipa.dipa.lpr-2.lpl-1 text{}' #DONE #TODO utf-8 problem
-definition='body > div:nth-child(1) > div.pos-body > div.pr.dsense.dsense-noh > div.sense-body.dsense_b > div:nth-child(1) > div.ddef_h > div text{}' # TODO Get one uniq definition.
+phrase='.dhw text{}' # TODO FIX Not stable
+type_='.posgram text{}' # TODO FIX Not stable
+pronunciation='.uk .ipa.dipa.lpr-2.lpl-1 text{}' #TODO utf-8 problem
+definition='.def.ddef_d.db text{}' # TODO Get one uniq definition.
 level='.epp-xref.dxref text{}' #DONE
 
 # Request
@@ -40,30 +40,31 @@ if [ "$(cat $file)" = "" ]; then
 else
 	## Level
 	tput dim;
-	cat $file | pup $level | grep -o '[A-z0-9]\+' | sort | uniq | flatten ' ';
-	tput sgr0;
-
-	## Phrase
-	tput bold; tput setaf 2;
-	cat $file | pup $phrase | grep -o '[A-z]\+' | sort | uniq | flatten ', ';
+	cat $file | pup -p $level | grep -o '[A-z0-9]\+' | sort|uniq | flatten ' ';
 	tput sgr0;
 	
-	# TODO
-	## Pronunciation
-	# printf ' | ';
-	# tput setaf 3;
-	# cat $file | pup $pronunciation | sort | uniq | flatten;
-	# tput sgr0;
+	## Phrase
+	tput bold; tput setaf 2;
+	cat $file | pup -p $phrase | grep -o '[A-z0-9]\+' | sort|uniq | flatten ', ';
+	tput sgr0;
+	
+	# Pronunciation
+	tput setaf 3;
+	cat $file | pup -p $pronunciation | sed 's/\s/ /g' | sort|uniq | flatten;
+	tput sgr0;
 	
 	## Type
 	printf ' ';
 	tput dim;
-	cat $file | pup $type_ | grep -o '[A-z]\+' | sed '/^.$/d' | sort | uniq |
+	cat $file | pup -p $type_ | grep -o '[A-z]\+' | sed '/^.$/d' | sort|uniq |
 		flatten ', ';
 	tput sgr0; echo;
 	
 	## Definition
 	echo
+	#TODO Replace grep command with sed to delete white spaces and replace two
+	#     empty lines with one empty line. Finally head -n 1 from definitions.
+	#     Or find a limit option for pup to limit result with 1.
 	cat $file | pup $definition | grep -o "[A-z'\"]\+" | tr '\n' ' ' | flatten;
 	echo;
 fi
